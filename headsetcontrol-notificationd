@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Config
+_thresholdWarning=30
+_thresholdEmpty=10
+_pollingInterval=3
+_debug=0
+_running=0
+declare -A _known_devices
+
+update() {
+  local _model=$1
+  local _battery=$2
+  local _old_battery=${_known_devices["${_model}"]}
+  _known_devices["${_model}"]=${_battery}
+  [[ ${_running} -eq 0 ]] && return
+  [[ ${_debug} -eq 1 ]] && printf "Model: %s Battery: %s -> %s\n" "${_model}" "${_old_battery}" "${_battery}"
+  [[ "${_battery}" == "${_old_battery}" ]] && return
+
+  case ${_battery} in
+    "Charging")
+      notify-send "${_model}" "Charger connected!"
+      return
+      ;;
+    0)
+      notify-send "${_model}" "Disconnected"
+      return
+      ;;
+    *)
+      if [[ "${_old_battery}" == "Charging" ]]; then
+        notify-send "${_model}" "Charger disconnected!"
+      elif [[ ${_old_battery} -eq 0 ]]; then
+        notify-send "${_model}" "Connected! \n Battery level ${_battery}%" --icon=battery
+        return
+      fi
+      if (( _battery <= _thresholdEmpty )); then
+        notify-send "${_model}" "Low" --icon=battery-low
+        return
+      elif (( _battery <= _thresholdWarning )); then
+        notify-send "${_model}" "Depetion" --icon=battery-caution
+        return
+      else
+        notify-send "${_model}" "Battery level ${_battery}%" --icon=battery
+        return
+      fi
+      ;;
+  esac
+}
+
+main() {
+  while true; do
+    readarray -t ret < <(headsetcontrol -b)
+    local _model="${ret[0]#*[[:space:]]}"
+    update "${_model%*\!}" "${ret[-1]//[a-zA-Z\!\ \:\%]/}"
+    sleep ${_pollingInterval}
+    _running=1
+  done
+}
+
+main
