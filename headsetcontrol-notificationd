@@ -49,9 +49,11 @@ update() {
 
 main() {
   while true; do
-    readarray -t ret < <(headsetcontrol -b)
+    readarray -t ret < <(headsetcontrol -b | grep "\S" )
     local _model="${ret[0]#*[[:space:]]}"
-    update "${_model%*\!}" "${ret[-1]//[a-zA-Z\!\ \:\%]/}"
+    local _battery="${ret[1]//[a-zA-Z\!\ \:\%]/}"
+    _model="${_model%*\!}"
+    update "${_model}" "${_battery}"
     sleep ${_pollingInterval}
     _running=1
   done
