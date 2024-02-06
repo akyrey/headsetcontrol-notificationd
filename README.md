@@ -1,5 +1,10 @@
 # headsetcontrol-notificationd
 
+**Fork from https://gitlab.com/devnore/headsetcontrol-notificationd all credits to him**
+
+I only changed service name to make it equal to README.md one, fixed `Disconnected` event for my headset and add my
+preferences when the headset connects.
+
 ![screenshot](https://screenshot.tbspace.de/jpcefkgwhvy.png)
 
 headsetcontrol-notificationd is a small daemon that polls headsetcontrol to display notifications about the charge status of several headsets.

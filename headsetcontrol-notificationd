@@ -22,7 +22,7 @@ update() {
       notify-send "${_model}" "Charger connected!"
       return
       ;;
-    0)
+    "")
       notify-send "${_model}" "Disconnected"
       return
       ;;
@@ -30,6 +30,8 @@ update() {
       if [[ "${_old_battery}" == "Charging" ]]; then
         notify-send "${_model}" "Charger disconnected!"
       elif [[ ${_old_battery} -eq 0 ]]; then
+        # Disable lights and set maximum sidetone
+        headsetcontrol -l 0 && headsetcontrol -s 128
         notify-send "${_model}" "Connected! \n Battery level ${_battery}%" --icon=battery
         return
       fi
